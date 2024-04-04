@@ -1,4 +1,4 @@
-# A UNO inspired card game
+# A UNO inspired card game, not the actual game (don't sue me thx xD)
 import random
 from pprint import pprint
 
@@ -13,7 +13,8 @@ def roll(lst: list, n: int = 1, right: bool = True) -> None:
 class Card:
     VALID_COLORS = ('red', 'green', 'blue', 'yellow', 'wild')
     VALID_VALUES = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'skip', 'reverse', 'draw2', 'wild', 'wild4')
-    VALID_POINTS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'skip': 20, 'reverse': 20, 'draw2': 20, 'wild': 50, 'wild4': 50}
+    VALID_POINTS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'skip': 20,
+                    'reverse': 20, 'draw2': 20, 'wild': 50, 'wild4': 50}
 
     def __init__(self, color: int, value: int):
         """Initialize a card with a color and a value using the given integers as indices for the VALID_COLORS
@@ -22,13 +23,13 @@ class Card:
         self.__value: str = Card.VALID_VALUES[value]
         self.__points: int = Card.VALID_POINTS[self.__value]
 
-    def get_color(self):
+    def get_color(self) -> str:
         return self.__color
 
-    def get_value(self):
+    def get_value(self) -> str:
         return self.__value
 
-    def get_points(self):
+    def get_points(self) -> int:
         return self.__points
 
     def __str__(self):
@@ -53,24 +54,31 @@ def create_deck():
 class CardPile:
     def __init__(self):
         self.__deck = []
-        ...
 
-    def add(self, card):
-        ...
+    def add_to_pile(self, card: Card) -> None:
+        self.__deck.append(card)
+
+    def get_card_pile(self, amount: int = 0) -> list[Card]:
+        return self.__deck[-amount:]
+
+    def pop_all_cards_without_top(self) -> list[Card]:
+        cards = self.__deck[:-1]
+        del self.__deck[:-1]
+        return cards
 
 
 class DrawPile:
     def __init__(self, deck: list[Card]):
         self.__deck = deck
 
-    def shuffle_cards(self):
+    def shuffle_cards(self) -> None:
         for _ in range(2):
             random.shuffle(self.__deck)
 
-    def pop_from_draw_pile(self):
+    def pop_from_draw_pile(self) -> Card:
         return self.__deck.pop()
 
-    def get_draw_pile(self):
+    def get_draw_pile(self) -> list[Card]:
         return self.__deck
 
 
@@ -78,13 +86,13 @@ class Hand:
     def __init__(self):
         self.__inventory = []
 
-    def add_cards(self, cards: list[Card]):
+    def add_cards(self, cards: list[Card]) -> None:
         self.__inventory.extend(cards)
 
-    def remove_card(self, index: int):
+    def remove_card(self, index: int) -> Card:
         return self.__inventory.pop(index)
 
-    def get_hand(self):
+    def get_hand(self) -> list[Card]:
         return self.__inventory
 
 
@@ -105,15 +113,24 @@ class Game(DrawPile, CardPile):
         DrawPile.__init__(self, deck.copy())
         CardPile.__init__(self)
 
-    def give_starting_hand(self, num_cards: int):
+    def give_starting_hand(self, num_cards: int) -> None:
         for _ in range(num_cards):
             for player in self.__player_order:
                 player.add_cards([self.pop_from_draw_pile()])
+        self.add_to_pile(self.pop_from_draw_pile())
 
     def draw(self):
         ...  # TODO: Implement draw method and CardPile class
 
     def setup(self):
+        ...
+
+    def round(self) -> dict | None:
+        """
+        The main game loop, where the game is played.
+        it needs to be called in a loop until the game is over.
+        it returns the winner and Points of the Players or None if the game is not over.
+        """
         ...
 
 
@@ -123,7 +140,12 @@ if __name__ == '__main__':
     game = Game(new_deck, 2)
     game.shuffle_cards()
     game.give_starting_hand(7)
-    # pprint(game.get_draw_pile())
 
 
-
+    # a = CardPile()
+    # for example in range(10):
+    #     a.add_to_pile(new_deck[example])
+    # print(a.get_card_pile(3))
+    # print(a.get_card_pile())
+    # print(a.pop_all_cards_without_top())
+    # print(a.get_card_pile())
