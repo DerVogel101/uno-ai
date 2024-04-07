@@ -10,7 +10,7 @@ def roll(lst: list, n: int = 1, right: bool = True) -> None:
     lst.extend(temp)
 
 
-class Card:
+class Card:  # FIXME: Implement wild card color selection attribute
     VALID_COLORS = ('red', 'green', 'blue', 'yellow', 'wild')
     VALID_VALUES = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'skip', 'reverse', 'draw2', 'wild', 'wild4')
     VALID_POINTS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'skip': 20,
@@ -66,6 +66,9 @@ class CardPile:
         del self.__deck[:-1]
         return cards
 
+    def get_top_card(self) -> Card:
+        return self.__deck[-1]
+
 
 class DrawPile:
     def __init__(self, deck: list[Card]):
@@ -95,12 +98,27 @@ class Hand:
     def get_hand(self) -> list[Card]:
         return self.__inventory
 
+    def get_valid_cards_to_play(self, top_card: Card) -> dict[int: Card]:
+        valid_cards: dict[int: Card] = {}
+        for index, card in enumerate(self.__inventory):
+            if card.get_color() == top_card.get_color() or card.get_value() == top_card.get_value() or card.get_color() == 'wild':  # FIXME: Implement wild card logic
+                valid_cards[index] = card
+        return valid_cards
+
 
 class Player(Hand):
     def __init__(self, id_num: int):
         Hand.__init__(self)
         self._id = id_num
-        ...
+
+    def get_id(self) -> int:
+        return self._id
+
+    def __str__(self):
+        return f'Player {self._id}'
+
+    def __repr__(self):
+        return f'Player({self._id})'
 
 
 class Game(DrawPile, CardPile):
@@ -126,6 +144,23 @@ class Game(DrawPile, CardPile):
         ...
 
     def round(self) -> dict | None:
+        # TODO: Replace test code with actual game logic
+        print("\nPlayer ID:", self.__player_order[0].get_id())
+        print("Card on Pile:", self.get_top_card())
+        print("Hand of Player:")
+        pprint(self.__player_order[0].get_hand())
+        print("Valid Cards to Play:")
+        pprint(self.__player_order[0].get_valid_cards_to_play(self.get_top_card()))
+        # select a random card from the valid cards to play
+        try:
+            selected_card_index = random.choice(list(self.__player_order[0].get_valid_cards_to_play(self.get_top_card()).keys()))
+            selected_card = self.__player_order[0].remove_card(selected_card_index)
+            print("Selected Card:", selected_card)
+            self.add_to_pile(selected_card)
+        except IndexError:
+            print("No valid cards to play.")
+            self.__player_order[0].add_cards([self.pop_from_draw_pile()])
+        roll(self.__player_order)
         """
         The main game loop, where the game is played.
         it needs to be called in a loop until the game is over.
@@ -140,6 +175,10 @@ if __name__ == '__main__':
     game = Game(new_deck, 2)
     game.shuffle_cards()
     game.give_starting_hand(7)
+    game.round()
+    game.round()
+    game.round()
+    game.round()
 
 
     # a = CardPile()
