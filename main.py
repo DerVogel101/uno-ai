@@ -10,7 +10,7 @@ def roll(lst: list, n: int = 1, right: bool = True) -> None:
     lst.extend(temp)
 
 
-class Card:  # FIXME: Implement wild card color selection attribute
+class Card:
     VALID_COLORS = ('red', 'green', 'blue', 'yellow', 'wild')
     VALID_VALUES = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'skip', 'reverse', 'draw2', 'wild', 'wild4')
     VALID_POINTS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'skip': 20,
@@ -22,6 +22,14 @@ class Card:  # FIXME: Implement wild card color selection attribute
         self.__color: str = Card.VALID_COLORS[color]
         self.__value: str = Card.VALID_VALUES[value]
         self.__points: int = Card.VALID_POINTS[self.__value]
+
+    def set_color(self, color: str) -> None:
+        if self.__value not in Card.VALID_VALUES[-2:]:
+            raise ValueError(f'Color can only be set for wild cards, not {self.__color}')
+        elif color not in Card.VALID_COLORS[0:4]:
+            raise ValueError(f'Invalid color: {color}')
+        else:
+            self.__color = color
 
     def get_color(self) -> str:
         return self.__color
@@ -158,6 +166,7 @@ class Game(DrawPile, CardPile):
             print("Selected Card:", selected_card)
             self.add_to_pile(selected_card)
         except IndexError:
+            
             print("No valid cards to play.")
             self.__player_order[0].add_cards([self.pop_from_draw_pile()])
         roll(self.__player_order)
@@ -175,10 +184,8 @@ if __name__ == '__main__':
     game = Game(new_deck, 2)
     game.shuffle_cards()
     game.give_starting_hand(7)
-    game.round()
-    game.round()
-    game.round()
-    game.round()
+    for _ in range(100):
+        game.round()
 
 
     # a = CardPile()
